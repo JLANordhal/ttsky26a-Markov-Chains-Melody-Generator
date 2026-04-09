@@ -14,22 +14,22 @@ module markov_chain_fsm
     input  wire         duration_prob_trans_matrix_sel, 
     input  wire[15:0]   rnd,
     // ========= Outputs =========
-    output wire[]       note
+    output wire[11:0]       ticks_target
 );
-    // ========== Parameters ==========
+    // ========== Local Parameters ==========
     // -- Notes FSM states
-    parameter MUTE  =   3'b000;
-    parameter DO    =   3'b001; 
-    parameter RE    =   3'b010; 
-    parameter MI    =   3'b011;
-    parameter SOL   =   3'b100;
-    parameter LA    =   3'b101;
+    localparam MUTE  =   3'b000;
+    localparam DO    =   3'b001; 
+    localparam RE    =   3'b010; 
+    localparam MI    =   3'b011;
+    localparam SOL   =   3'b100;
+    localparam LA    =   3'b101;
 
     // -- Durations FSM states
-    parameter  QUAVER       =   2'b00;  // 1 quaver 
-    parameter  CROTCHET     =   2'b01;  // 2 quaver
-    parameter  MINIM        =   2'b10;  // 4 quaevr
-    parameter  SEMIBREVE    =   2'b11;  // 8 quaver
+    localparam  QUAVER       =   2'b00;  // 1 quaver 
+    localparam  CROTCHET     =   2'b01;  // 2 quaver
+    localparam  MINIM        =   2'b10;  // 4 quaevr
+    localparam  SEMIBREVE    =   2'b11;  // 8 quaver
     
     // ========== Registers =========
     reg[20:0] BPM_conuter;
@@ -418,23 +418,195 @@ module markov_chain_fsm
             case(note_FSM_state)
                 MUTE: begin
                     // -- Output
-                    
-
+                    ticks_target    <=  0;   // -- Mute Freq: 0 Hz -> Output set to zero.
+                    // Transition
+                    if duration_done
+                    begin
+                        if rnd[7:0] == note_prob_trans_matrix[0][0]         // -- Stays on mute 
+                        begin
+                            note_FSM_state  <=  MUTE;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][1]    // -- Transition to Do
+                        begin
+                            note_FSM_state  <=  DO;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][2]    // -- transition to Re
+                        begin
+                            note_FSM_state  <=  RE;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][3]    // -- Transition to Mi
+                        begin
+                            note_FSM_state  <=  MI;
+                        end
+                        else if rnd[7:0] == note_pron_trans_matrix[0][4]    // -- Transition to Sol
+                        begin
+                            note_FSM_state  <-  SOL;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][5]    // -- Transition to La
+                        begin
+                            note_FSM_state  <=  LA;
+                        end
+                    end
                 end
 
                 DO: begin
+                    ticks_target    <=  1908;   // -- Do freq: 262 Hz -> 1908 ticks for a 50% Dutty Cycle.
+                    // Transition
+                     if duration_done
+                    begin
+                        if rnd[7:0] == note_prob_trans_matrix[0][0]         // -- Transition to mute 
+                        begin
+                            note_FSM_state  <=  MUTE;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][1]    // -- Stays on Do
+                        begin
+                            note_FSM_state  <=  DO;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][2]    // -- transition to Re
+                        begin
+                            note_FSM_state  <=  RE;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][3]    // -- Transition to Mi
+                        begin
+                            note_FSM_state  <=  MI;
+                        end
+                        else if rnd[7:0] == note_pron_trans_matrix[0][4]    // -- Transition to Sol
+                        begin
+                            note_FSM_state  <-  SOL;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][5]    // -- Transition to La
+                        begin
+                            note_FSM_state  <=  LA;
+                        end
+                    end
                 end
 
                 RE: begin
+                    ticks_target    <=  1701;   // -- Re freq: 294 Hz -> 1701 ticks for a 50% Dutty Cycle.
+                    // Transition
+                     if duration_done
+                    begin
+                        if rnd[7:0] == note_prob_trans_matrix[0][0]         // -- Transition to mute 
+                        begin
+                            note_FSM_state  <=  MUTE;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][1]    // -- Transition to Do
+                        begin
+                            note_FSM_state  <=  DO;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][2]    // -- Stays on Re
+                        begin
+                            note_FSM_state  <=  RE;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][3]    // -- Transition to Mi
+                        begin
+                            note_FSM_state  <=  MI;
+                        end
+                        else if rnd[7:0] == note_pron_trans_matrix[0][4]    // -- Transition to Sol
+                        begin
+                            note_FSM_state  <-  SOL;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][5]    // -- Transition to La
+                        begin
+                            note_FSM_state  <=  LA;
+                        end
+                    end
                 end
 
                 MI: begin
+                    ticks_target    <=  1515;   // -- Mi freq: 330 Hz -> 1515 ticks for a 50% Dutty Cycle. 
+                    // Transition
+                    if duration_done
+                    begin
+                        if rnd[7:0] == note_prob_trans_matrix[0][0]         // -- Transition to mute 
+                        begin
+                            note_FSM_state  <=  MUTE;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][1]    // -- Transition to Do
+                        begin
+                            note_FSM_state  <=  DO;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][2]    // -- transition to Re
+                        begin
+                            note_FSM_state  <=  RE;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][3]    // -- Stays on Mi
+                        begin
+                            note_FSM_state  <=  MI;
+                        end
+                        else if rnd[7:0] == note_pron_trans_matrix[0][4]    // -- Transition to Sol
+                        begin
+                            note_FSM_state  <-  SOL;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][5]    // -- Transition to La
+                        begin
+                            note_FSM_state  <=  LA;
+                        end
+                    end
                 end
 
                 SOL: begin
+                    ticks_target    <=  1275;   // -- Sol freq: 392 Hz -> 1275 ticks for a 50% Dutty Cyle.
+                    // Transition
+                    if duration_done
+                    begin
+                        if rnd[7:0] == note_prob_trans_matrix[0][0]         // -- Transition to mute 
+                        begin
+                            note_FSM_state  <=  MUTE;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][1]    // -- Transition to Do
+                        begin
+                            note_FSM_state  <=  DO;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][2]    // -- transition to Re
+                        begin
+                            note_FSM_state  <=  RE;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][3]    // -- Transition to Mi
+                        begin
+                            note_FSM_state  <=  MI;
+                        end
+                        else if rnd[7:0] == note_pron_trans_matrix[0][4]    // -- Stays on Sol
+                        begin
+                            note_FSM_state  <-  SOL;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][5]    // -- Transition to La
+                        begin
+                            note_FSM_state  <=  LA;
+                        end
+                    end
                 end
 
                 LA: begin
+                    ticks_target    <=  1136;   // -- La freq: 440 Hz -> 1136 ticks for a 50% Dutty Cycle.
+                    // Transition
+                    if duration_done
+                    begin
+                        if rnd[7:0] == note_prob_trans_matrix[0][0]         // -- Transition to mute 
+                        begin
+                            note_FSM_state  <=  MUTE;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][1]    // -- Transition to Do
+                        begin
+                            note_FSM_state  <=  DO;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][2]    // -- transition to Re
+                        begin
+                            note_FSM_state  <=  RE;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][3]    // -- Transition to Mi
+                        begin
+                            note_FSM_state  <=  MI;
+                        end
+                        else if rnd[7:0] == note_pron_trans_matrix[0][4]    // -- Transition to Sol
+                        begin
+                            note_FSM_state  <-  SOL;
+                        end
+                        else if rnd[7:0] == note_prob_trans_matrix[0][5]    // -- Stays on La
+                        begin
+                            note_FSM_state  <=  LA;
+                        end
+                    end 
                 end
             endcase
         end

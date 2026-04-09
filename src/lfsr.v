@@ -11,6 +11,7 @@ module lfsr
    // ========== Inputs ==========
    input  wire      clk,
    input  wire      reset_n,
+   input  wire      enable,
    input  wire[3:0] seed_low,
    // ========== Outputs ==========
    output wire[15:0] rnd
@@ -31,14 +32,17 @@ module lfsr
     always @(posedge clk)
     begin
 
-        if (!reset_n)                                       
+        if !reset_n                                       
         begin
             shift_reg   <=  {12'hCA5, seed_low}; 
         end
 
         else
         begin
-            shift_reg   <=  {shift_reg[14:0], feedback};
+            if enable
+            begin
+                shift_reg   <=  {shift_reg[14:0], feedback};
+            end
         end
     end
 
