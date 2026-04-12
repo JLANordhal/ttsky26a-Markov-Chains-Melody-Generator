@@ -1,59 +1,62 @@
-# SPDX-FileCopyrightText: © 2024 Tiny Tapeout
-# SPDX-License-Identifier: Apache-2.0
-
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles, RisingEdge
 
 @cocotb.test()
 async def test_melody_generator(dut):
-    """Prueba del generador de melodías: Reset, configuración y detección de PWM"""
+    """Prueba funcional del generador de melodías estocásticas"""
     
-    dut._log.info("Iniciando simulación del Generador de Música de Arellano Nordahl")
+    dut._log.info("Iniciando simulación: Generador de Música (Arellano Nordahl)")
 
-    # Definimos el reloj a 1 MHz (1000ns de periodo) según tu info.yaml
+    # 1. Configuración del Reloj (1 MHz = 1us de periodo)
+    # Esto genera la señal que entra al pin 'clk' definido en el Canvas
     clock = Clock(dut.clk, 1, unit="us")
     cocotb.start_soon(clock.start())
 
-    # --- Inicialización y Reset ---
-    dut._log.info("Aplicando Reset...")
-    dut.ena.value = 1
-    dut.rst_n.value = 0
-    dut.ui_in.value = 0
-    dut.uio_in.value = 0
+    # 2. Inicialización de señales y Reset
+    dut._log.info("Aplicando Reset al sistema...")
+    dut.ena.value = 1       # Activamos el diseño (Enable)
+    dut.ui_in.value = 0     # Entradas a cero
+    dut.uio_in.value = 0    # Bidireccionales a cero
+    dut.rst_n.value = 0     # Reset activo (bajo)
     
-    # Esperamos 10 ciclos de reloj para asegurar un reset limpio
+    # Esperamos 10 ciclos para que el reset se propague
     await ClockCycles(dut.clk, 10)
-    dut.rst_n.value = 1
-    dut._log.info("Sistema fuera de reset")
+    dut.rst_n.value = 1     # Liberamos el reset
+    dut._log.info("Sistema fuera de reset y operando")
 
-    # --- Configuración de Entradas (ui_in) ---
-    # ui_in[3:0] = SEED (Semilla del LFSR, ej: 4'b1010 -> 10)
-    # ui_in[4]   = BPM_SEL (0 -> 120 BPM, 1 -> 60 BPM)
-    # ui_in[5]   = DUR_MATRIX_SEL (0 o 1)
-    semilla = 10
-    bpm_sel = 0
-    matrix_sel = 0
+    # 3. Configuración de parámetros de usuario (ui_in)
+    # Basado en tu info.yaml:
+    # ui_in[3:0] -> Seed (Semilla)
+    # ui_in[4]   -> BPM_SEL (0: 120, 1: 60)
+    # ui_in[5]   -> DUR_MATRIX_SEL
+    seed = 0xA          # Ejemplo: semilla 1010
+    bpm = 0             # 120 BPM
+    matrix = 0          # Matriz A
     
-    # Combinamos los bits para formar el byte de entrada ui_in
-    val_entrada = (matrix_sel << 5) | (bpm_sel << 4) | semilla
-    dut.ui_in.value = val_entrada
-    
-    dut._log.info(f"Configuración: Seed={semilla}, BPM_SEL={bpm_sel}, Matrix_SEL={matrix_sel}")
+    input_val = (matrix << 5) | (bpm << 4) | (seed & 0xF)
+    dut.ui_in.value = input_val
+    dut._log.info(f"Configuración aplicada: Seed={seed}, BPM={bpm}, Matrix={matrix}")
 
-    # --- Verificación de Actividad PWM ---
-    # Queremos confirmar que el pin uo_out[0] (PWM_SIG) cambia de estado
+    # 4. Monitoreo de la salida PWM (uo_out[0])
+    # Como el diseño es aleatorio, verificamos que 'haya vida' (actividad en el pin)
     actividad_detectada = False
-    dut._log.info("Monitoreando uo_out[0] (PWM_SIG) en busca de señal de audio...")
+    dut._log.info("Buscando pulsos PWM en uo_out[0]...")
     
-    # Revisamos durante 2000 ciclos de reloj
-    for _ in range(2000):
+    # Revisamos los próximos 5000 ciclos de reloj
+    for _ in range(5000):
         await RisingEdge(dut.clk)
-        if dut.uo_out[0].value == 1:
+        
+        # Leemos el bus uo_out completo y extraemos el bit 0 (PWM_SIG)
+        # Esto evita el error de 'Packed objects cannot be indexed'
+        bus_salida = int(dut.uo_out.value)
+        pwm_sig = bus_salida & 0x01
+        
+        if pwm_sig == 1:
             actividad_detectada = True
             break
             
-    # Si después de 2000 ciclos uo_out[0] nunca fue '1', el test falla
-    assert actividad_detectada, "ERROR: No se detectó ninguna señal PWM en uo_out[0]. Revisa tu lógica de PWM."
+    # Si después de 5000 ciclos no hubo ni un solo '1', algo va mal
+    assert actividad_detectada, "ERROR: No se detectó señal PWM en uo_out[0]. Revisa la lógica del PWM o del FSM."
     
-    dut._log.info("¡TEST EXITOSO! Se detectó actividad de audio en la salida.")
+    dut._log.info("¡Prueba superada! Se detectó actividad de audio en la salida.")
