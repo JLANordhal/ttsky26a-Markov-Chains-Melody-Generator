@@ -1,19 +1,19 @@
 `default_nettype none
 `timescale 1ns / 1ps
 
-/* Este es el "cascarón" (Harness) del test. 
-   Su única función es conectar tu módulo con el simulador.
+/* Este testbench instancia el módulo principal y crea los cables 
+   que cocotb controlará desde el archivo test.py.
 */
 module tb ();
 
-  // Configuración para grabar las señales y verlas en GTKWave
+  // Generación de archivo de ondas para GTKWave
   initial begin
     $dumpfile("tb.fst");
     $dumpvars(0, tb);
     #1;
   end
 
-  // Definición de las señales (cables)
+  // Señales para conectar con el módulo
   reg clk;
   reg rst_n;
   reg ena;
@@ -24,25 +24,25 @@ module tb ();
   wire [7:0] uio_oe;
 
 `ifdef GL_TEST
-  // Pines de alimentación necesarios para el test del GDS final
+  // Señales de alimentación para pruebas de nivel de compuertas (Gate Level)
   wire VPWR = 1'b1;
   wire VGND = 1'b0;
 `endif
 
-  // --- CONEXIÓN DE TU PROYECTO ---
+  // --- Instancia del DUT (Tu Proyecto) ---
   tt_um_Melody_Generator_JLANordhal user_project (
 `ifdef GL_TEST
       .VPWR(VPWR),
       .VGND(VGND),
 `endif
-      .ui_in  (ui_in),    // Entradas: Semilla, BPM, Matriz
-      .uo_out (uo_out),   // Salidas: PWM Audio
-      .uio_in (uio_in),   // Bidireccionales (no usados)
-      .uio_out(uio_out),
-      .uio_oe (uio_oe),
-      .ena    (ena),      // Activación del chip
-      .clk    (clk),      // Reloj de 1MHz
-      .rst_n  (rst_n)     // Reset (activo en bajo)
+      .ui_in  (ui_in),    // Entradas dedicadas
+      .uo_out (uo_out),   // Salidas dedicadas
+      .uio_in (uio_in),   // IOs bidireccionales: Entrada
+      .uio_out(uio_out),  // IOs bidireccionales: Salida
+      .uio_oe (uio_oe),   // IOs bidireccionales: Habilitación
+      .ena    (ena),      // Habilitado por el sistema
+      .clk    (clk),      // Reloj principal
+      .rst_n  (rst_n)     // Reset (activo bajo)
   );
 
 endmodule

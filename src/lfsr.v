@@ -11,13 +11,14 @@ module lfsr
    // ========== Inputs ==========
    input  wire      clk,
    input  wire      reset_n,
+   input  wire      enable,
    input  wire[3:0] seed_low,
    // ========== Outputs ==========
-   output wire[7:0] rnd
+   output wire[15:0] rnd
 );
 
-    // ========== Register ==========
-    reg[7:0] shift_reg;
+    // ========== Register ========== 
+    reg[15:0] shift_reg;
 
     // ========== Wires ==========
     wire feedback;
@@ -25,24 +26,24 @@ module lfsr
     // ========== Assigments ==========    
     
     // Feedback bit that enters the register.
-    assign feedback = shift_reg[7]^shift_reg[5]^shift_reg[4]^shift_reg[3];
+    assign feedback = shift_reg[15]^shift_reg[14]^shift_reg[12]^shift_reg[3];
 
     // Secuencial process that generates the random number.
     always @(posedge clk)
     begin
-
         if (!reset_n)                                       
         begin
-            shift_reg   <=  {4'hA, seed_low}; 
+            shift_reg   <=  {12'hCA5, seed_low}; 
         end
-
         else
         begin
-            shift_reg   <=  {shift_reg[6:0], feedback};
+            if (enable)
+            begin
+                shift_reg   <=  {shift_reg[14:0], feedback};
+            end
         end
     end
 
     // Rnd assign
     assign rnd = shift_reg;
-
 endmodule 
