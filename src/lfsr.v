@@ -26,20 +26,18 @@ module lfsr
     // ========== Assigments ==========    
     
     // Feedback bit that enters the register.
-    assign feedback = shift_reg[16]^shift_reg[14]^shift_reg[13]^shift_reg[11];
+    assign feedback = shift_reg[15]^shift_reg[14]^shift_reg[12]^shift_reg[3];
 
     // Secuencial process that generates the random number.
     always @(posedge clk)
     begin
-
-        if !reset_n                                       
+        if (!reset_n)                                       
         begin
             shift_reg   <=  {12'hCA5, seed_low}; 
         end
-
         else
         begin
-            if enable
+            if (enable)
             begin
                 shift_reg   <=  {shift_reg[14:0], feedback};
             end
@@ -48,5 +46,4 @@ module lfsr
 
     // Rnd assign
     assign rnd = shift_reg;
-
 endmodule 
