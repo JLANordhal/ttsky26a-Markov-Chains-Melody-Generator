@@ -1,56 +1,57 @@
 # Tiny Tapeout project information
 project:
-  title:        ""      # Project title
-  author:       ""      # Your name
-  discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  ""      # One line description of what your project does
-  language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
-  clock_hz:     0       # Clock frequency in Hz (or 0 if not applicable)
+  title:        "Melody Generator based on Markov Chains"     
+  author:       "Arellano Nordahl Jose Luis"      
+  discord:      "Wucho_N"      
+  description:  "The design generates coherent melodies, using two Markov Chains, one that selects the duration and another for the notes on the Do Major Pentatonic Scale (Mute, Do, Re, Mi, Sol, La)
+                The module is built by three main modules one LFSR that generates a pseudorandom 16-bit number, the MSB is for the duration Markov chain, and the LSB for the notes chain. The user:
+                can select bits 0, 1, 2, and 3 of the seed, so there are up to 16 different melodies. The next module is the Markov chains; in this module, the logic is managed, and lastly, there is the:
+                PWM generator module that receives the desired note from the second module and generates the PWM signal at the desired frequency with a 50% DC. With another input, the user can select: 
+                between two different probability transition matrices for the duration Markov Chain. One is biased towards short-duration notes, the other towards long-duration notes. And finally, with:
+                another input, 60 or 120 BPM can be chosen.:"
+  language:     "Verilog"
+  clock_hz:     1000000       
 
-  # How many tiles your design occupies? A single tile is about 167x108 uM.
-  tiles: "1x1"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2 or 8x2
+  tiles: "1x1"          
 
-  # Your top module name must start with "tt_um_". Make it unique by including your github username:
-  top_module:  "tt_um_example"
+  
+  top_module:  "tt_um_Melody_Generator_JLANordhal"
 
-  # List your project's source files here.
-  # Source files must be in ./src and you must list each source file separately, one per line.
-  # Don't forget to also update `PROJECT_SOURCES` in test/Makefile.
+
   source_files:
     - "project.v"
 
-# The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
-# This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
+
 pinout:
   # Inputs
-  ui[0]: ""
-  ui[1]: ""
-  ui[2]: ""
-  ui[3]: ""
-  ui[4]: ""
-  ui[5]: ""
-  ui[6]: ""
+  ui[0]: "SEED[0]"           -- Bit 0 for the seed of the lfsr.
+  ui[1]: "SEED[1]"           -- Bit 1 for the seed of the lfsr.
+  ui[2]: "SEED[2]"           -- Bit 2 for the seed of the lfsr.
+  ui[3]: "SEED[3]"           -- Bit 3 for the seed of the lfsr.
+  ui[4]: "BPM_SEL"           -- 0 -> 120 BP;, 1 -> 60 BPM 
+  ui[5]: "DUR_MATRIX_SEL"    -- 0 -> Matrix A1 (shorter notes), 1 -> Matrix A1 (longer notes).
+  ui[6]: ""                  -- NOT USE
   ui[7]: ""
 
   # Outputs
-  uo[0]: ""
-  uo[1]: ""
-  uo[2]: ""
-  uo[3]: ""
-  uo[4]: ""
-  uo[5]: ""
-  uo[6]: ""
-  uo[7]: ""
+  uo[0]: "PWM_SIG"           -- PWM Signal output  
+  uo[1]: ""                  -- NOT USE
+  uo[2]: ""                  -- NOT USE
+  uo[3]: ""                  -- NOT USE
+  uo[4]: ""                  -- NOT USE
+  uo[5]: ""                  -- NOT USE
+  uo[6]: ""                  -- NOT USE
+  uo[7]: ""                  -- NOT USE
 
   # Bidirectional pins
-  uio[0]: ""
-  uio[1]: ""
-  uio[2]: ""
-  uio[3]: ""
-  uio[4]: ""
-  uio[5]: ""
-  uio[6]: ""
-  uio[7]: ""
+  uio[0]: ""                 -- NOT USE
+  uio[1]: ""                 -- NOT USE
+  uio[2]: ""                 -- NOT USE
+  uio[3]: ""                 -- NOT USE
+  uio[4]: ""                 -- NOT USE
+  uio[5]: ""                 -- NOT USE
+  uio[6]: ""                 -- NOT USE
+  uio[7]: ""                 -- NOT USE
 
 # Do not change!
 yaml_version: 6
