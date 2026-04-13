@@ -17,7 +17,7 @@ module tt_um_Melody_Generator_JLANordhal(
 );
 
   // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out[7:1]  = 0; 
+  assign uo_out[7:1] = 0; 
   assign uio_out = 0;
   assign uio_oe  = 0;
     
@@ -30,6 +30,7 @@ module tt_um_Melody_Generator_JLANordhal(
   wire[11:0]    ticks_target;
   wire          pwm_signal;
   
+  assign uo_out[0] =  pwm_signal;
   // ========== Instances ==========
   // -- LFSR Instance
   lfsr U1_lfsr(
@@ -58,6 +59,6 @@ module tt_um_Melody_Generator_JLANordhal(
     .clk(clk),
     .reset_n(rst_n),
     .ticks_target(ticks_target),
-    .pwm_signal(uo_out[0])
+    .pwm_signal(pwm_signal)
   );
 endmodule
