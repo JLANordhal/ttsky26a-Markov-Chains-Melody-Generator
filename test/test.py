@@ -1,40 +1,48 @@
-# SPDX-FileCopyrightText: © 2024 Tiny Tapeout
-# SPDX-License-Identifier: Apache-2.0
-
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles
 
-
 @cocotb.test()
-async def test_project(dut):
-    dut._log.info("Start")
+async def test_melody_generator(dut):
+    """
+    Testbench para el Generador de Melodías Estocásticas.
+    Configurado para una simulación de larga duración (10 segundos).
+    """
+    
+    dut._log.info("Iniciando simulación: Generador de Música (Arellano Nordahl)")
 
-    # Set the clock period to 10 us (100 KHz)
-    clock = Clock(dut.clk, 10, unit="us")
+    # 1. Configuración del Reloj
+    # 1 MHz = 1 microsegundo por ciclo.
+    clock = Clock(dut.clk, 1, unit="us")
     cocotb.start_soon(clock.start())
 
-    # Reset
-    dut._log.info("Reset")
-    dut.ena.value = 1
-    dut.ui_in.value = 0
-    dut.uio_in.value = 0
-    dut.rst_n.value = 0
+    # 2. Inicialización y Reset
+    dut._log.info("Aplicando Reset...")
+    dut.ena.value = 1       # Activar el diseño
+    dut.ui_in.value = 0     # Entradas iniciales
+    dut.uio_in.value = 0    # Entradas bidireccionales
+    dut.rst_n.value = 0     # Reset activo (bajo)
+    
+    # Esperamos 10 ciclos para estabilizar
     await ClockCycles(dut.clk, 10)
-    dut.rst_n.value = 1
+    dut.rst_n.value = 1     # Liberar el sistema
+    dut._log.info("Sistema operando. Iniciando grabación de 10 segundos...")
 
-    dut._log.info("Test project behavior")
+    # 3. Configuración de parámetros mediante ui_in
+    # ui_in[3:0] -> Semilla (Seed)
+    # ui_in[4]   -> BPM_SEL (0: 120, 1: 60)
+    # ui_in[5]   -> DUR_MATRIX_SEL (Cambio de estilo rítmico)
+    seed = 0x7          # Semilla de ejemplo
+    bpm = 1             # Selección de velocidad
+    matrix = 0          # Matriz de probabilidad A
+    
+    input_val = (matrix << 5) | (bpm << 4) | (seed & 0xF)
+    dut.ui_in.value = input_val
 
-    # Set the input values you want to test
-    dut.ui_in.value = 20
-    dut.uio_in.value = 30
-
-    # Wait for one clock cycle to see the output values
-    await ClockCycles(dut.clk, 1)
-
-    # The following assersion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-    assert dut.uo_out.value == 50
-
-    # Keep testing the module by changing the input values, waiting for
-    # one or more clock cycles, and asserting the expected output values.
+    # 4. DURACIÓN DE LA SIMULACIÓN
+    # 10,000,000 ciclos / 1,000,000 Hz = 10 segundos.
+    # NOTA: El archivo 'tb.fst' resultante será pesado (varios MB).
+    # Asegúrate de tener espacio en disco en tu sistema Arch.
+    await ClockCycles(dut.clk, 10000000)
+    
+    dut._log.info("Simulación terminada con éxito tras 10 segundos de audio simulado.")
