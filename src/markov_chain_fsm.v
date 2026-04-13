@@ -433,210 +433,130 @@ module markov_chain_fsm
         end
     end    
 
-    // FSM Notes
     always @(posedge clk)
+begin
+    if (!reset_n)
     begin
-        if (!reset_n)
-        begin
-            note_FSM_state  <=  DO;
-            ticks_target_reg <= 1908;
-        end
-        else
-        begin
-            case(note_FSM_state)
-                MUTE: begin
-                    // -- Output
-                    ticks_target_reg    <=  0;   // -- Mute Freq: 0 Hz -> Output set to zero.
-                    // Transition
-                    if (duration_done_rise)
-                    begin
-                        if (rnd[7:0] < note_prob_trans_matrix[0][0])         // -- Stays on mute 
-                        begin
-                            note_FSM_state  <=  MUTE;
-                        end
-                        else if (note_prob_trans_matrix[0][0] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[0][1])  // -- Transition to Do
-                        begin
-                            note_FSM_state  <=  DO;
-                        end
-                        else if (note_prob_trans_matrix[0][1]< rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[0][2])    // -- transition to Re
-                        begin
-                            note_FSM_state  <=  RE;
-                        end
-                        else if (note_prob_trans_matrix[0][2] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[0][3])    // -- Transition to Mi
-                        begin
-                            note_FSM_state  <=  MI;
-                        end
-                        else if (note_prob_trans_matrix[0][3] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[0][4])    // -- Transition to Sol
-                        begin
-                            note_FSM_state  <=  SOL;
-                        end
-                        else if (note_prob_trans_matrix[0][4] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[0][5])    // -- Transition to La
-                        begin
-                            note_FSM_state  <=  LA;
-                        end
-                    end
-                end
-
-                DO: begin
-                    ticks_target_reg    <=  1908;   // -- Do freq: 262 Hz -> 1908 ticks for a 50% Dutty Cycle.
-                    // Transition
-                     if (duration_done_rise)
-                    begin
-                        if (rnd[7:0] < note_prob_trans_matrix[1][0])         // -- Transition to mute 
-                        begin
-                            note_FSM_state  <=  MUTE;
-                        end
-                        else if (note_prob_trans_matrix[1][0] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[1][1])    // -- Stays on Do
-                        begin
-                            note_FSM_state  <=  DO;
-                        end
-                        else if (note_prob_trans_matrix[1][1] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[1][2])    // -- transition to Re
-                        begin
-                            note_FSM_state  <=  RE;
-                        end
-                        else if (note_prob_trans_matrix[1][2] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[1][3])    // -- Transition to Mi
-                        begin
-                            note_FSM_state  <=  MI;
-                        end
-                        else if (note_prob_trans_matrix[1][3] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[1][4])    // -- Transition to Sol
-                        begin
-                            note_FSM_state  <=  SOL;
-                        end
-                        else if (note_prob_trans_matrix[1][4] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[1][5])    // -- Transition to La
-                        begin
-                            note_FSM_state  <=  LA;
-                        end
-                    end
-                end
-
-                RE: begin
-                    ticks_target_reg   <=  1701;   // -- Re freq: 294 Hz -> 1701 ticks for a 50% Dutty Cycle.
-                    // Transition
-                     if (duration_done_rise)
-                    begin
-                        if (rnd[7:0] < note_prob_trans_matrix[2][0])         // -- Transition to mute 
-                        begin
-                            note_FSM_state  <=  MUTE;
-                        end
-                        else if (note_prob_trans_matrix[2][0] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[2][1])    // -- Transition to Do
-                        begin
-                            note_FSM_state  <=  DO;
-                        end
-                        else if (note_prob_trans_matrix[2][1] <rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[2][2])    // -- Stays on Re
-                        begin
-                            note_FSM_state  <=  RE;
-                        end
-                        else if (note_prob_trans_matrix[2][2]< rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[2][3])    // -- Transition to Mi
-                        begin
-                            note_FSM_state  <=  MI;
-                        end
-                        else if (note_prob_trans_matrix[2][3] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[2][4])    // -- Transition to Sol
-                        begin
-                            note_FSM_state  <=  SOL;
-                        end
-                        else if (note_prob_trans_matrix[2][4] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[2][5])    // -- Transition to La
-                        begin
-                            note_FSM_state  <=  LA;
-                        end
-                    end
-                end
-
-                MI: begin
-                    ticks_target_reg    <=  1515;   // -- Mi freq: 330 Hz -> 1515 ticks for a 50% Dutty Cycle. 
-                    // Transition
-                    if (duration_done_rise)
-                    begin
-                        if (rnd[7:0] < note_prob_trans_matrix[3][0])        // -- Transition to mute 
-                        begin
-                            note_FSM_state  <=  MUTE;
-                        end
-                        else if(note_prob_trans_matrix[3][0] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[3][1])    // -- Transition to Do
-                        begin
-                            note_FSM_state  <=  DO;
-                        end
-                        else if (note_prob_trans_matrix[3][1] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[3][2])    // -- transition to Re
-                        begin
-                            note_FSM_state  <=  RE;
-                        end
-                        else if (note_prob_trans_matrix[3][2] <rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[3][3])    // -- Stays on Mi
-                        begin
-                            note_FSM_state  <=  MI;
-                        end
-                        else if (note_prob_trans_matrix[3][3] <rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[3][4])    // -- Transition to Sol
-                        begin
-                            note_FSM_state  <=  SOL;
-                        end
-                        else if (note_prob_trans_matrix[3][4]< rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[3][5])    // -- Transition to La
-                        begin
-                            note_FSM_state  <=  LA;
-                        end
-                    end
-                end
-
-                SOL: begin
-                    ticks_target_reg    <=  1275;   // -- Sol freq: 392 Hz -> 1275 ticks for a 50% Dutty Cyle.
-                    // Transition
-                    if (duration_done_rise)
-                    begin
-                        if (rnd[7:0] < note_prob_trans_matrix[4][0])         // -- Transition to mute 
-                        begin
-                            note_FSM_state  <=  MUTE;
-                        end
-                        else if (note_prob_trans_matrix[4][0] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[4][1])    // -- Transition to Do
-                        begin
-                            note_FSM_state  <=  DO;
-                        end
-                        else if (note_prob_trans_matrix[4][1] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[4][2])    // -- transition to Re
-                        begin
-                            note_FSM_state  <=  RE;
-                        end
-                        else if (note_prob_trans_matrix[4][2] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[4][3])    // -- Transition to Mi
-                        begin
-                            note_FSM_state  <=  MI;
-                        end
-                        else if (note_prob_trans_matrix[4][3]< rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[4][4])    // -- Stays on Sol
-                        begin
-                            note_FSM_state  <=  SOL;
-                        end
-                        else if (note_prob_trans_matrix[4][4]< rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[4][5])    // -- Transition to La
-                        begin
-                            note_FSM_state  <=  LA;
-                        end
-                    end
-                end
-
-                LA: begin
-                    ticks_target_reg    <=  1136;   // -- La freq: 440 Hz -> 1136 ticks for a 50% Dutty Cycle.
-                    // Transition
-                    if (duration_done_rise)
-                    begin
-                        if (rnd[7:0] < note_prob_trans_matrix[5][0])         // -- Transition to mute 
-                        begin
-                            note_FSM_state  <=  MUTE;
-                        end
-                        else if (note_prob_trans_matrix[5][0] < rnd[7:0] & rnd[7:0] < note_prob_trans_matrix[5][1])    // -- Transition to Do
-                        begin
-                            note_FSM_state  <=  DO;
-                        end
-                        else if (note_prob_trans_matrix[5][1] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[5][2])    // -- transition to Re
-                        begin
-                            note_FSM_state  <=  RE;
-                        end
-                        else if (note_prob_trans_matrix[5][2] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[5][3])    // -- Transition to Mi
-                        begin
-                            note_FSM_state  <=  MI;
-                        end
-                        else if (note_prob_trans_matrix[5][3] < rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[5][4])    // -- Transition to Sol
-                        begin
-                            note_FSM_state  <=  SOL;
-                        end
-                        else if (note_prob_trans_matrix[5][4]< rnd[7:0] && rnd[7:0] < note_prob_trans_matrix[5][5])    // -- Stays on La
-                        begin
-                            note_FSM_state  <=  LA;
-                        end
-                    end 
-                end
-            endcase
-        end
+        note_FSM_state   <= DO;
+        ticks_target_reg <= 1908;
     end
+    else
+    begin
+        case(note_FSM_state)
+            MUTE: begin
+                ticks_target_reg <= 0;
+                if (duration_done_rise)
+                begin
+                    if (rnd[7:0] < note_prob_trans_matrix[0][0]) 
+                        note_FSM_state <= MUTE;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[0][0] + note_prob_trans_matrix[0][1])) 
+                        note_FSM_state <= DO;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[0][0] + note_prob_trans_matrix[0][1] + note_prob_trans_matrix[0][2])) 
+                        note_FSM_state <= RE;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[0][0] + note_prob_trans_matrix[0][1] + note_prob_trans_matrix[0][2] + note_prob_trans_matrix[0][3])) 
+                        note_FSM_state <= MI;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[0][0] + note_prob_trans_matrix[0][1] + note_prob_trans_matrix[0][2] + note_prob_trans_matrix[0][3] + note_prob_trans_matrix[0][4])) 
+                        note_FSM_state <= SOL;
+                    else 
+                        note_FSM_state <= LA;
+                end
+            end
+
+            DO: begin
+                ticks_target_reg <= 1908;
+                if (duration_done_rise)
+                begin
+                    if (rnd[7:0] < note_prob_trans_matrix[1][0]) 
+                        note_FSM_state <= MUTE;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[1][0] + note_prob_trans_matrix[1][1])) 
+                        note_FSM_state <= DO;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[1][0] + note_prob_trans_matrix[1][1] + note_prob_trans_matrix[1][2])) 
+                        note_FSM_state <= RE;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[1][0] + note_prob_trans_matrix[1][1] + note_prob_trans_matrix[1][2] + note_prob_trans_matrix[1][3])) 
+                        note_FSM_state <= MI;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[1][0] + note_prob_trans_matrix[1][1] + note_prob_trans_matrix[1][2] + note_prob_trans_matrix[1][3] + note_prob_trans_matrix[1][4])) 
+                        note_FSM_state <= SOL;
+                    else 
+                        note_FSM_state <= LA;
+                end
+            end
+
+            RE: begin
+                ticks_target_reg <= 1701;
+                if (duration_done_rise)
+                begin
+                    if (rnd[7:0] < note_prob_trans_matrix[2][0]) 
+                        note_FSM_state <= MUTE;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[2][0] + note_prob_trans_matrix[2][1])) 
+                        note_FSM_state <= DO;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[2][0] + note_prob_trans_matrix[2][1] + note_prob_trans_matrix[2][2])) 
+                        note_FSM_state <= RE;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[2][0] + note_prob_trans_matrix[2][1] + note_prob_trans_matrix[2][2] + note_prob_trans_matrix[2][3])) 
+                        note_FSM_state <= MI;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[2][0] + note_prob_trans_matrix[2][1] + note_prob_trans_matrix[2][2] + note_prob_trans_matrix[2][3] + note_prob_trans_matrix[2][4])) 
+                        note_FSM_state <= SOL;
+                    else 
+                        note_FSM_state <= LA;
+                end
+            end
+
+            MI: begin
+                ticks_target_reg <= 1515;
+                if (duration_done_rise)
+                begin
+                    if (rnd[7:0] < note_prob_trans_matrix[3][0]) 
+                        note_FSM_state <= MUTE;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[3][0] + note_prob_trans_matrix[3][1])) 
+                        note_FSM_state <= DO;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[3][0] + note_prob_trans_matrix[3][1] + note_prob_trans_matrix[3][2])) 
+                        note_FSM_state <= RE;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[3][0] + note_prob_trans_matrix[3][1] + note_prob_trans_matrix[3][2] + note_prob_trans_matrix[3][3])) 
+                        note_FSM_state <= MI;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[3][0] + note_prob_trans_matrix[3][1] + note_prob_trans_matrix[3][2] + note_prob_trans_matrix[3][3] + note_prob_trans_matrix[3][4])) 
+                        note_FSM_state <= SOL;
+                    else 
+                        note_FSM_state <= LA;
+                end
+            end
+
+            SOL: begin
+                ticks_target_reg <= 1275;
+                if (duration_done_rise)
+                begin
+                    if (rnd[7:0] < note_prob_trans_matrix[4][0]) 
+                        note_FSM_state <= MUTE;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[4][0] + note_prob_trans_matrix[4][1])) 
+                        note_FSM_state <= DO;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[4][0] + note_prob_trans_matrix[4][1] + note_prob_trans_matrix[4][2])) 
+                        note_FSM_state <= RE;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[4][0] + note_prob_trans_matrix[4][1] + note_prob_trans_matrix[4][2] + note_prob_trans_matrix[4][3])) 
+                        note_FSM_state <= MI;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[4][0] + note_prob_trans_matrix[4][1] + note_prob_trans_matrix[4][2] + note_prob_trans_matrix[4][3] + note_prob_trans_matrix[4][4])) 
+                        note_FSM_state <= SOL;
+                    else 
+                        note_FSM_state <= LA;
+                end
+            end
+
+            LA: begin
+                ticks_target_reg <= 1136;
+                if (duration_done_rise)
+                begin
+                    if (rnd[7:0] < note_prob_trans_matrix[5][0]) 
+                        note_FSM_state <= MUTE;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[5][0] + note_prob_trans_matrix[5][1])) 
+                        note_FSM_state <= DO;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[5][0] + note_prob_trans_matrix[5][1] + note_prob_trans_matrix[5][2])) 
+                        note_FSM_state <= RE;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[5][0] + note_prob_trans_matrix[5][1] + note_prob_trans_matrix[5][2] + note_prob_trans_matrix[5][3])) 
+                        note_FSM_state <= MI;
+                    else if (rnd[7:0] < (note_prob_trans_matrix[5][0] + note_prob_trans_matrix[5][1] + note_prob_trans_matrix[5][2] + note_prob_trans_matrix[5][3] + note_prob_trans_matrix[5][4])) 
+                        note_FSM_state <= SOL;
+                    else 
+                        note_FSM_state <= LA;
+                end 
+            end
+        endcase
+    end
+end
 endmodule
